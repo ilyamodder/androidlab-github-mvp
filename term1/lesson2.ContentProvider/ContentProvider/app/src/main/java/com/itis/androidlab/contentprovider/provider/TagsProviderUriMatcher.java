@@ -26,7 +26,7 @@ import android.util.SparseArray;
  * All methods are thread safe, except {@link #buildUriMatcher()} and {@link #buildEnumsMap()},
  * which is why they are called only from the constructor.
  */
-public class TheVoiceProviderUriMatcher {
+public class TagsProviderUriMatcher {
 
     /**
      * All methods on a {@link UriMatcher} are thread safe, except {@code addURI}.
@@ -38,7 +38,7 @@ public class TheVoiceProviderUriMatcher {
     /**
      * This constructor needs to be called from a thread-safe method as it isn't thread-safe itself.
      */
-    public TheVoiceProviderUriMatcher() {
+    public TagsProviderUriMatcher() {
         mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         buildUriMatcher();
     }
