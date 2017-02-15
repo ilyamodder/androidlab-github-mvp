@@ -7,7 +7,6 @@ import com.facebook.stetho.Stetho;
 /**
  * @author Valiev Timur.
  */
-
 public class App extends Application {
 
     @Override

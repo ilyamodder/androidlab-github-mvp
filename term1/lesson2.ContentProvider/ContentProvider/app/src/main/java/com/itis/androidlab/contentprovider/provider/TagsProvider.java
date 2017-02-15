@@ -24,12 +24,12 @@ public class TagsProvider extends ContentProvider {
 
     private TagsDatabase mOpenHelper;
 
-    private TheVoiceProviderUriMatcher mUriMatcher;
+    private TagsProviderUriMatcher mUriMatcher;
 
     @Override
     public boolean onCreate() {
         mOpenHelper = new TagsDatabase(getContext());
-        mUriMatcher = new TheVoiceProviderUriMatcher();
+        mUriMatcher = new TagsProviderUriMatcher();
         return true;
     }
 
