@@ -2,6 +2,7 @@ package com.itis.androidlab.githubmvp.screen.walkthrough;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 
@@ -20,15 +21,13 @@ import butterknife.OnClick;
 
 
 public class WalkthroughActivity extends AppCompatActivity implements
-        PageChangeViewPager.PagerStateListener {
-
-    private static final int PAGES_COUNT = 3;
+        PageChangeViewPager.PagerStateListener, WalkthroughView {
 
     @BindView(R.id.pager) PageChangeViewPager mPager;
 
     @BindView(R.id.btn_walkthrough) Button mActionButton;
 
-    private int mCurrentItem = 0;
+    private WalkthroughPresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,72 +35,42 @@ public class WalkthroughActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_walkthrough);
         ButterKnife.bind(this);
 
-        mPager.setAdapter(new WalkthroughAdapter(getFragmentManager(), getBenefits()));
         mPager.setOnPageChangedListener(this);
 
-        mActionButton.setText(R.string.next_uppercase);
-
-        if (PreferenceUtils.isWalkthroughPassed()) {
-            startAuthActivity();
-        }
-
-        /**
-         * TODO : task
-         *
-         * Refactor this screen using MVP pattern
-         *
-         * Hint: there are no requests on this screen, so it's good place to start
-         *
-         * You can simply go through each line of code and decide if it should be in View or in Presenter
-         */
+        mPresenter = new WalkthroughPresenter(this);
+        mPresenter.init();
     }
 
     @SuppressWarnings("unused")
     @OnClick(R.id.btn_walkthrough)
     public void onActionButtonClick() {
-        if (isLastBenefit()) {
-            PreferenceUtils.saveWalkthroughPassed();
-            startAuthActivity();
-        } else {
-            mCurrentItem++;
-            showBenefit(mCurrentItem, isLastBenefit());
-        }
+        mPresenter.onButtonClick();
     }
 
     @Override
     public void onPageChanged(int selectedPage, boolean fromUser) {
-        if (fromUser) {
-            mCurrentItem = selectedPage;
-            showBenefit(mCurrentItem, isLastBenefit());
-        }
+        mPresenter.onPageChanged(selectedPage, fromUser);
     }
 
-    private boolean isLastBenefit() {
-        return mCurrentItem == PAGES_COUNT - 1;
+    @Override
+    public void showBenefit(int page) {
+        mPager.setCurrentItem(page, true);
     }
 
-    private void showBenefit(int index, boolean isLastBenefit) {
-        mActionButton.setText(isLastBenefit ? R.string.finish_uppercase : R.string.next_uppercase);
-        if (index == mPager.getCurrentItem()) {
-            return;
-        }
-        mPager.smoothScrollNext(getResources().getInteger(android.R.integer.config_mediumAnimTime));
-    }
-
-    private void startAuthActivity() {
+    @Override
+    public void showLoginScreen() {
         AuthActivity.start(this);
         finish();
     }
 
-    @NonNull
-    private List<Benefit> getBenefits() {
-        return new ArrayList<Benefit>() {
-            {
-                add(Benefit.WORK_TOGETHER);
-                add(Benefit.CODE_HISTORY);
-                add(Benefit.PUBLISH_SOURCE);
-            }
-        };
+    @Override
+    public void setBenefits(@NonNull List<Benefit> benefits) {
+        mPager.setAdapter(new WalkthroughAdapter(getFragmentManager(), benefits));
+    }
+
+    @Override
+    public void setButtonText(@StringRes int textId) {
+        mActionButton.setText(textId);
     }
 
 }

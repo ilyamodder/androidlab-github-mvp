@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 
 import com.itis.androidlab.githubmvp.api.ApiFactory;
 import com.itis.androidlab.githubmvp.content.Authorization;
+import com.itis.androidlab.githubmvp.content.Commit;
+import com.itis.androidlab.githubmvp.content.CommitResponse;
 import com.itis.androidlab.githubmvp.content.Repository;
 import com.itis.androidlab.githubmvp.utils.AuthorizationUtils;
 import com.itis.androidlab.githubmvp.utils.PreferenceUtils;
@@ -48,6 +50,28 @@ public class DefaultGithubRepository implements GithubRepository {
                     PreferenceUtils.saveUserName(login);
                     ApiFactory.recreate();
                     return Observable.just(authorization);
+                })
+                .compose(RxUtils.async());
+    }
+
+    @NonNull
+    @Override
+    public Observable<List<Commit>> getCommits(@NonNull String owner, @NonNull String repoName) {
+        return ApiFactory.getGithubService().commits(owner, repoName)
+                .flatMap(Observable::from)
+                .map(CommitResponse::getCommit)
+                .toList()
+                .map(commits -> {
+                    Realm.getDefaultInstance().executeTransaction(realm -> {
+                        realm.delete(Commit.class);
+                        realm.insert(commits);
+                    });
+                    return commits;
+                })
+                .onErrorResumeNext(throwable -> {
+                    Realm realm = Realm.getDefaultInstance();
+                    RealmResults<Commit> commits = realm.where(Commit.class).findAll();
+                    return Observable.just(realm.copyFromRealm(commits));
                 })
                 .compose(RxUtils.async());
     }

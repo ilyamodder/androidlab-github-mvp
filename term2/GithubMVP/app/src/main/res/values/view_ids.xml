@@ -16,4 +16,8 @@
     <!-- repositories items -->
     <item name="repositoryName" type="id"/>
     <item name="repositoryLanguage" type="id"/>
+
+    <!-- commits items -->
+    <item name="commitMessage" type="id"/>
+    <item name="commitAuthor" type="id"/>
 </resources>
